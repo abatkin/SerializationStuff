@@ -22,7 +22,7 @@ public class Stopwatch<T> {
         int result = func.run(items);
         long nanoEnd = System.nanoTime();
         long nanos = nanoEnd - nanoStart;
-        double seconds = nanos / NANOS_TO_SECONDS;
+        double seconds = (double)nanos / (double)NANOS_TO_SECONDS;
         stats.finishIteration(seconds, result);
     }
 
