@@ -1,21 +1,17 @@
 package net.batkin.s11n.data;
 
-import java.util.Collection;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
 public class Stopwatch {
 
-    public static long time(String name, Supplier<? extends Collection<?>> runnable) {
+    public static long time(String name, Runnable runnable) {
         long nanoStart = System.nanoTime();
-//        System.out.println(name + ": " + runnable.get().size());
+        runnable.run();
         long nanoEnd = System.nanoTime();
 
         long nanos = nanoEnd - nanoStart;
         return nanos;
     }
 
-    public static void timeSeries(String name, int runs, Supplier<? extends Collection<?>> runnable) {
+    public static void timeSeries(String name, int runs, Runnable runnable) {
         long min = 0;
         long max = 0;
         long total = 0;

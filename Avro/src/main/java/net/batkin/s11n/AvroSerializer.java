@@ -59,7 +59,7 @@ public class AvroSerializer {
     }
 
     public static byte[] serializeOrdersWithSchema(List<AvroOrder> orders) {
-        DatumWriter datumWriter = new SpecificDatumWriter(AvroOrder.class);
+        DatumWriter datumWriter = new SpecificDatumWriter(AvroOrder.getClassSchema());
         DataFileWriter<AvroOrder> writer = new DataFileWriter<>(datumWriter);
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             writer.create(AvroOrder.getClassSchema(), bos);
@@ -75,7 +75,7 @@ public class AvroSerializer {
 
     private static List<byte[]> serializeOrdersWithSchemaWithReuse(List<AvroOrder> orders) {
         try {
-            DatumWriter datumWriter = new SpecificDatumWriter(AvroOrder.class);
+            DatumWriter datumWriter = new SpecificDatumWriter(AvroOrder.getClassSchema());
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             List<byte[]> byteArrays = new ArrayList<>();
             for (AvroOrder order : orders) {
@@ -94,7 +94,7 @@ public class AvroSerializer {
     }
 
     public static byte[] serializeOrdersWithoutSchema(List<AvroOrder> orders) {
-        DatumWriter datumWriter = new SpecificDatumWriter(AvroOrder.class);
+        DatumWriter datumWriter = new SpecificDatumWriter(AvroOrder.getClassSchema());
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             BinaryEncoder encoder = EncoderFactory.get().binaryEncoder(baos, null);
             for (AvroOrder order : orders) {
@@ -109,7 +109,7 @@ public class AvroSerializer {
 
     private static List<byte[]> serializeOrdersWithoutSchemaWithReuse(List<AvroOrder> orders) {
         try {
-            DatumWriter datumWriter = new SpecificDatumWriter(AvroOrder.class);
+            DatumWriter datumWriter = new SpecificDatumWriter(AvroOrder.getClassSchema());
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             BinaryEncoder encoder = null;
             List<byte[]> byteArrays = new ArrayList<>();
