@@ -1,0 +1,10 @@
+{"namespace": "net.batkin.s11n.avro.generated",
+  "type": "record",
+  "name": "AvroOrder",
+  "fields": [
+    {"name": "ticker", "type": "string"},
+    {"name": "quantity",  "type": "long"},
+    {"name": "accountNumber", "type": "int"},
+    {"name": "strategy", "type": "string"}
+  ]
+}
