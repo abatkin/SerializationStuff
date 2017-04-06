@@ -19,24 +19,23 @@ import java.util.stream.Collectors;
 import static net.batkin.s11n.AvroSerializer.*;
 import static net.batkin.s11n.data.DataGenerator.NUM_ORDERS;
 import static net.batkin.s11n.data.DataGenerator.NUM_RUNS;
-import static net.batkin.s11n.data.Stopwatch.timeSeries;
 
 public class AvroDeserializer {
 
     public static void main(String[] args) throws Exception {
         List<AvroOrder> avroOrders = generateAvroOrders(NUM_ORDERS);
 
-        List<byte[]> oneBlobWithSchema = Collections.singletonList(serializeOrdersWithSchema(avroOrders));
-        List<byte[]> oneBlobWithoutSchema = Collections.singletonList(serializeOrdersWithoutSchema(avroOrders));
-        List<byte[]> manyBlobsWithSchema = avroOrders.stream().map(item -> serializeOrdersWithSchema(Collections.singletonList(item))).collect(Collectors.toList());
-        List<byte[]> manyBlobsWithoutSchema = avroOrders.stream().map(item -> serializeOrdersWithoutSchema(Collections.singletonList(item))).collect(Collectors.toList());
-
-        timeSeries("Deserialize with schema (one byte array)", NUM_RUNS, () -> deserializeWithEmbeddedSchema(oneBlobWithSchema));
-        timeSeries("Deserialize without schema (one byte array)", NUM_RUNS, () -> deserializeWithoutEmbeddedSchema(oneBlobWithoutSchema));
-        timeSeries("Deserialize with schema (many byte arrays) no-reuse", NUM_RUNS, () -> deserializeWithEmbeddedSchema(manyBlobsWithSchema));
-        timeSeries("Deserialize without schema (many byte arrays) no-reuse", NUM_RUNS, () -> deserializeWithoutEmbeddedSchema(manyBlobsWithoutSchema));
-        timeSeries("Deserialize with schema (many byte arrays) with-reuse", NUM_RUNS, () -> deserializeWithEmbeddedSchemaWithReuse(manyBlobsWithSchema));
-        timeSeries("Deserialize without schema (many byte arrays) with-reuse", NUM_RUNS, () -> deserializeWithoutEmbeddedSchemaWithReuse(manyBlobsWithoutSchema));
+//        List<byte[]> oneBlobWithSchema = Collections.singletonList(serializeOrdersWithSchema(avroOrders));
+//        List<byte[]> oneBlobWithoutSchema = Collections.singletonList(serializeOrdersWithoutSchema(avroOrders));
+//        List<byte[]> manyBlobsWithSchema = avroOrders.stream().map(item -> serializeOrdersWithSchema(Collections.singletonList(item))).collect(Collectors.toList());
+//        List<byte[]> manyBlobsWithoutSchema = avroOrders.stream().map(item -> serializeOrdersWithoutSchema(Collections.singletonList(item))).collect(Collectors.toList());
+//
+//        timeSeries("Deserialize with schema (one byte array)", NUM_RUNS, () -> deserializeWithEmbeddedSchema(oneBlobWithSchema));
+//        timeSeries("Deserialize without schema (one byte array)", NUM_RUNS, () -> deserializeWithoutEmbeddedSchema(oneBlobWithoutSchema));
+//        timeSeries("Deserialize with schema (many byte arrays) no-reuse", NUM_RUNS, () -> deserializeWithEmbeddedSchema(manyBlobsWithSchema));
+//        timeSeries("Deserialize without schema (many byte arrays) no-reuse", NUM_RUNS, () -> deserializeWithoutEmbeddedSchema(manyBlobsWithoutSchema));
+//        timeSeries("Deserialize with schema (many byte arrays) with-reuse", NUM_RUNS, () -> deserializeWithEmbeddedSchemaWithReuse(manyBlobsWithSchema));
+//        timeSeries("Deserialize without schema (many byte arrays) with-reuse", NUM_RUNS, () -> deserializeWithoutEmbeddedSchemaWithReuse(manyBlobsWithoutSchema));
     }
 
     private static void deserializeWithEmbeddedSchema(List<byte[]> blobs) {

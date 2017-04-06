@@ -1,43 +1,38 @@
 package net.batkin.s11n.data;
 
-public class Stopwatch {
+import java.util.Collection;
 
-    public static long time(String name, Runnable runnable) {
+public class Stopwatch<T> {
+
+    private static final long NANOS_TO_SECONDS = 1_000_000_000;
+
+    private Collection<T> items;
+    private BenchmarkStatistics statistics;
+    private String language;
+    private int runs;
+
+    public Stopwatch(String language, int runs, Collection<T> items) {
+        this.language = language;
+        this.runs = runs;
+        this.items = items;
+    }
+
+    private <T> void time(BenchmarkStatistics stats, Collection<T> items, TimeableOperation<T> func) {
         long nanoStart = System.nanoTime();
-        runnable.run();
+        int result = func.run(items);
         long nanoEnd = System.nanoTime();
-
         long nanos = nanoEnd - nanoStart;
-        return nanos;
+        double seconds = nanos / NANOS_TO_SECONDS;
+        stats.finishIteration(seconds, result);
     }
 
-    public static void timeSeries(String name, int runs, Runnable runnable) {
-        long min = 0;
-        long max = 0;
-        long total = 0;
+    public BenchmarkStatistics timeSeries(String options, String operation, TimeableOperation<T> func) {
+        int itemCount = items.size();
+        BenchmarkStatistics stats = new DescriptiveBenchmarkStatistics(language, options, operation, itemCount);
         for (int run = 0; run < runs; run++) {
-            long time = time(name, runnable);
-            total += time;
-            if (min == 0 || time < min) {
-                min = time;
-            }
-            if (max == 0 || time > max) {
-                max = time;
-            }
+            time(stats, items, func);
         }
-        long nanos = total / runs;
-
-        dumpTimes("min", name, min);
-        dumpTimes("max", name, max);
-        dumpTimes("total", name, total);
-        dumpTimes("avg", name, nanos);
-    }
-
-    private static void dumpTimes(String metric, String name, long nanos) {
-        long millis = nanos / 1_000_000;
-        double secs = nanos / 1_000_000_000.0d;
-
-        System.out.println("[" + metric + "] [" + name + "] " + nanos + "ns, " + millis + "ms, " + secs + "secs");
+        return stats;
     }
 
 }

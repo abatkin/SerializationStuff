@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 import static net.batkin.s11n.data.DataGenerator.NUM_ORDERS;
 import static net.batkin.s11n.data.DataGenerator.NUM_RUNS;
-import static net.batkin.s11n.data.Stopwatch.timeSeries;
 import static net.batkin.s11n.protobuf.ProtobufSerializer.generateProtobufOrders;
 import static net.batkin.s11n.protobuf.ProtobufSerializer.serializeOrders;
 
@@ -28,7 +27,7 @@ public class ProtobufDeserializer {
         System.out.println("Generated!");
 
 //        timeSeries("Deserialize (one byte array)", NUM_RUNS, () -> deserialize(oneBlob));
-        timeSeries("Deserialize (many byte arrays)", NUM_RUNS, () -> deserialize(manyBlobs));
+//        timeSeries("Deserialize (many byte arrays)", NUM_RUNS, () -> deserialize(manyBlobs));
     }
 
     private static List<Order> deserialize(List<byte[]> blobs) {

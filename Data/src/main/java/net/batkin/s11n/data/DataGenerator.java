@@ -8,8 +8,9 @@ import java.util.Random;
 
 public class DataGenerator {
 
-    public static final int NUM_ORDERS = 1_000_000;
+    public static final int NUM_ORDERS = 100_000;//1_000_000;
     public static final int NUM_RUNS = 10;
+    public static final String LANGUAGE_JAVA = "Java";
 
     public static List<Order> generateOrders(int numberOfOrders) {
         List<Order> orders = new ArrayList<>();

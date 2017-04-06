@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import static net.batkin.s11n.data.DataGenerator.NUM_ORDERS;
 import static net.batkin.s11n.data.DataGenerator.NUM_RUNS;
-import static net.batkin.s11n.data.Stopwatch.timeSeries;
 
 public class ProtobufSerializer {
 
@@ -24,7 +23,7 @@ public class ProtobufSerializer {
         List<ProtobufOrder.Order> orders = generateProtobufOrders(NUM_ORDERS);
 
 //        timeSeries("Serialize (one byte array)", NUM_RUNS, () -> serializeOrders(orders));
-        timeSeries("Serialize (many byte arrays)", NUM_RUNS, () -> orders.stream().map((item) -> serializeOrders(Collections.singletonList(item))).collect(Collectors.toList()));
+//        timeSeries("Serialize (many byte arrays)", NUM_RUNS, () -> orders.stream().map((item) -> serializeOrders(Collections.singletonList(item))).collect(Collectors.toList()));
     }
 
     public static List<byte[]> serializeOrders(List<ProtobufOrder.Order> orders) {
