@@ -4,13 +4,13 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 public class DescriptiveBenchmarkStatistics implements BenchmarkStatistics {
 
-	private static final String[] HEADINGS = new String[] {"Language", "Options", "Operation", "Iterations", "ItemCount", "RuntimeMin", "RuntimeMax", "RuntimeMean", "RuntimeStdDev", "RuntimeTotal", "ResultMin", "ResultMax", "ResultMean", "ResultStdDev"};
+	private static final String[] HEADINGS = new String[] {"Language", "Options", "Operation", "Iterations", "ItemCount", "ResultCount", "RuntimeMin", "RuntimeMax", "RuntimeMean", "RuntimeStdDev", "RuntimeTotal"};
 
 	private String language;
 	private String options;
 	private String operation;
 	private DescriptiveStatistics runtimeStatistics = new DescriptiveStatistics(DescriptiveStatistics.INFINITE_WINDOW);
-	private DescriptiveStatistics resultStatistics = new DescriptiveStatistics(DescriptiveStatistics.INFINITE_WINDOW);
+	private long resultCount;
 	private int iterations;
 	private int items;
 
@@ -25,7 +25,7 @@ public class DescriptiveBenchmarkStatistics implements BenchmarkStatistics {
 	public void finishIteration(double time, int result) {
 		iterations++;
 		runtimeStatistics.addValue(time);
-		resultStatistics.addValue(result);
+		resultCount += result;
 	}
 
 	@Override
@@ -54,23 +54,8 @@ public class DescriptiveBenchmarkStatistics implements BenchmarkStatistics {
 	}
 
 	@Override
-	public double resultMin() {
-		return resultStatistics.getMin();
-	}
-
-	@Override
-	public double resultMax() {
-		return resultStatistics.getMax();
-	}
-
-	@Override
-	public double resultMean() {
-		return resultStatistics.getMean();
-	}
-
-	@Override
-	public double resultStdDev() {
-		return resultStatistics.getStandardDeviation();
+	public long resultCount() {
+		return resultCount;
 	}
 
 	@Override
@@ -90,6 +75,6 @@ public class DescriptiveBenchmarkStatistics implements BenchmarkStatistics {
 
 	@Override
 	public Object[] toValues() {
-		return new Object[] {language, options, operation, iterations(), itemCount(), runtimeMin(), runtimeMax(), runtimeMean(), runtimeStdDev(), runtimeTotal(), resultMin(), resultMax(), resultMean(), resultStdDev()};
+		return new Object[] {language, options, operation, iterations(), itemCount(), resultCount(), runtimeMin(), runtimeMax(), runtimeMean(), runtimeStdDev(), runtimeTotal()};
 	}
 }

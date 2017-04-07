@@ -12,6 +12,7 @@ import org.apache.avro.specific.SpecificDatumWriter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 import static net.batkin.s11n.data.BenchmarkRun.r;
 import static net.batkin.s11n.data.DataGenerator.NUM_ORDERS;
 import static net.batkin.s11n.data.DataGenerator.NUM_RUNS;
+import static net.batkin.s11n.data.Util.sumArrayLengths;
 
 public class AvroSerializer {
 
@@ -26,23 +28,24 @@ public class AvroSerializer {
 
     public static void main(String[] args) throws Exception {
         BenchmarkRunner runner = new BenchmarkRunner(NUM_RUNS);
-        runBenchmarks(runner);
-        runner.dumpCsv();
+        runBenchmarks(NUM_ORDERS, runner);
+        runner.dumpCsv(System.out);
     }
 
-    public static void runBenchmarks(BenchmarkRunner runner) {
-        List<AvroOrder> orders = generateAvroOrders(NUM_ORDERS);
-        runner.runBenchmarks(orders,
-                r("With Schema, One Byte Array", OPERATION_SERIALIZE, AvroSerializer::serializeOneByteArrayWithSchema),
-                r("Without Schema, One Byte Array", OPERATION_SERIALIZE, AvroSerializer::serializeOneByteArrayWithoutSchema),
-                r("With Schema, Many Byte Arrays, New Serializer", OPERATION_SERIALIZE, AvroSerializer::serializeManyByteArraysWithSchemaNewSerializer),
-                r("Without Schema, Many Byte Arrays, New Serializer", OPERATION_SERIALIZE, AvroSerializer::serializeManyByteArraysWithoutSchemaNewSerializer),
-                r("With Schema, Many Byte Arrays, Reuse Serializer", OPERATION_SERIALIZE, AvroSerializer::serializeManyByteArraysWithSchemaReuseSerializer),
-                r("Without Schema, Many Byte Arrays, Reuse Serializer", OPERATION_SERIALIZE, AvroSerializer::serializeManyByteArraysWithoutSchemaReuseSerializer)
+    public static void runBenchmarks(int numOrders, BenchmarkRunner runner) {
+        List<AvroOrder> orders = generateAvroOrders(numOrders);
+        System.out.println("Generated orders for Serializer");
+        runner.runBenchmarks(
+                r("With Schema, One Byte Array", OPERATION_SERIALIZE, orders.size(), orders, AvroSerializer::benchmarkSerializeOneByteArrayWithSchema),
+                r("Without Schema, One Byte Array", OPERATION_SERIALIZE, orders.size(), orders, AvroSerializer::benchmarkSerializeOneByteArrayWithoutSchema),
+                r("With Schema, Many Byte Arrays, New Serializer", OPERATION_SERIALIZE, orders.size(), orders, AvroSerializer::serializeManyByteArraysWithSchemaNewSerializer),
+                r("Without Schema, Many Byte Arrays, New Serializer", OPERATION_SERIALIZE, orders.size(), orders, AvroSerializer::serializeManyByteArraysWithoutSchemaNewSerializer),
+                r("With Schema, Many Byte Arrays, Reuse Serializer", OPERATION_SERIALIZE, orders.size(), orders, AvroSerializer::benchmarkSerializeManyByteArraysWithSchemaReuseSerializer),
+                r("Without Schema, Many Byte Arrays, Reuse Serializer", OPERATION_SERIALIZE, orders.size(), orders, AvroSerializer::benchmarkSerializeManyByteArraysWithoutSchemaReuseSerializer)
         );
     }
 
-    private static int serializeOneByteArrayWithSchema(Collection<AvroOrder> avroOrders) {
+    public static byte[] serializeOneByteArrayWithSchema(Collection<AvroOrder> avroOrders) {
         DatumWriter datumWriter = new SpecificDatumWriter(AvroOrder.getClassSchema());
         DataFileWriter<AvroOrder> writer = new DataFileWriter<>(datumWriter);
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
@@ -51,13 +54,17 @@ public class AvroSerializer {
                 writer.append(order);
             }
             writer.close();
-            return bos.toByteArray().length;
+            return bos.toByteArray();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static int serializeOneByteArrayWithoutSchema(Collection<AvroOrder> avroOrders) {
+    private static int benchmarkSerializeOneByteArrayWithSchema(Collection<AvroOrder> avroOrders) {
+        return serializeOneByteArrayWithSchema(avroOrders).length;
+    }
+
+    public static byte[] serializeOneByteArrayWithoutSchema(Collection<AvroOrder> avroOrders) {
         DatumWriter datumWriter = new SpecificDatumWriter(AvroOrder.getClassSchema());
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             BinaryEncoder encoder = EncoderFactory.get().binaryEncoder(baos, null);
@@ -65,10 +72,14 @@ public class AvroSerializer {
                 datumWriter.write(order, encoder);
             }
             encoder.flush();
-            return baos.toByteArray().length;
+            return baos.toByteArray();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static int benchmarkSerializeOneByteArrayWithoutSchema(Collection<AvroOrder> avroOrders) {
+        return serializeOneByteArrayWithoutSchema(avroOrders).length;
     }
 
     private static int serializeManyByteArraysWithSchemaNewSerializer(Collection<AvroOrder> avroOrders) {
@@ -108,48 +119,55 @@ public class AvroSerializer {
         }
     }
 
-    private static int serializeManyByteArraysWithSchemaReuseSerializer(Collection<AvroOrder> avroOrders) {
+    public static List<byte[]> serializeManyByteArraysWithSchemaReuseSerializer(Collection<AvroOrder> avroOrders) {
         try {
             DatumWriter datumWriter = new SpecificDatumWriter(AvroOrder.getClassSchema());
             DataFileWriter<AvroOrder> writer = new DataFileWriter<>(datumWriter);
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
-            int len = 0;
+            List<byte[]> blobs = new ArrayList<>();
             for (AvroOrder order : avroOrders) {
                 bos.reset();
                 writer.create(AvroOrder.getClassSchema(), bos);
                 writer.append(order);
                 writer.close();
-                byte[] bytes = bos.toByteArray();
-                len += bytes.length;
+                byte[] blob = bos.toByteArray();
+                blobs.add(blob);
             }
-            return len;
+            return blobs;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static int serializeManyByteArraysWithoutSchemaReuseSerializer(Collection<AvroOrder> avroOrders) {
+    public static int benchmarkSerializeManyByteArraysWithSchemaReuseSerializer(Collection<AvroOrder> avroOrders) {
+        return sumArrayLengths(serializeManyByteArraysWithSchemaReuseSerializer(avroOrders));
+    }
+
+    public static List<byte[]> serializeManyByteArraysWithoutSchemaReuseSerializer(Collection<AvroOrder> avroOrders) {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             DatumWriter datumWriter = new SpecificDatumWriter(AvroOrder.getClassSchema());
             BinaryEncoder encoder = null;
 
-            int len = 0;
+            List<byte[]> blobs = new ArrayList<>();
             for (AvroOrder order : avroOrders) {
                 baos.reset();
                 encoder = EncoderFactory.get().binaryEncoder(baos, encoder);
                 datumWriter.write(order, encoder);
                 encoder.flush();
-                byte[] bytes = baos.toByteArray();
-                len += bytes.length;
+                byte[] blob = baos.toByteArray();
+                blobs.add(blob);
             }
-            return len;
+            return blobs;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
+    private static int benchmarkSerializeManyByteArraysWithoutSchemaReuseSerializer(Collection<AvroOrder> avroOrders) {
+        return sumArrayLengths(serializeManyByteArraysWithoutSchemaReuseSerializer(avroOrders));
+    }
 
     public static List<AvroOrder> generateAvroOrders(int numOrders) {
         List<Order> orders = DataGenerator.generateOrders(numOrders);

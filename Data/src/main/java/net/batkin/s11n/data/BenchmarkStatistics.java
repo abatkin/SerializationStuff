@@ -10,13 +10,9 @@ public interface BenchmarkStatistics {
 	double runtimeStdDev();
 	double runtimeTotal();
 
-	double resultMin();
-	double resultMax();
-	double resultMean();
-	double resultStdDev();
-	
 	int iterations();
 	int itemCount();
+	long resultCount();
 
 	String[] headings();
 	Object[] toValues();
