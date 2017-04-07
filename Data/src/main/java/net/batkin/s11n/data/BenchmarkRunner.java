@@ -13,8 +13,13 @@ import static net.batkin.s11n.data.DataGenerator.LANGUAGE_JAVA;
 public class BenchmarkRunner {
 
 	private List<BenchmarkStatistics> stats = new ArrayList<>();
+	private int numRuns;
 
-	public <T> void runBenchmarks(int numRuns, Collection<T> items, BenchmarkRun... runs) {
+	public BenchmarkRunner(int numRuns) {
+		this.numRuns = numRuns;
+	}
+
+	public <T> void runBenchmarks(Collection<T> items, BenchmarkRun... runs) {
 		Stopwatch<T> stopwatch = new Stopwatch<T>(LANGUAGE_JAVA, numRuns, items);
 		for (BenchmarkRun run : runs) {
 			stats.add(stopwatch.timeSeries(run.getOptions(), run.getOperation(), run.getFunction()));
