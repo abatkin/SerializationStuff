@@ -19,11 +19,11 @@ public class BenchmarkRunner {
 		this.numRuns = numRuns;
 	}
 
-	public <T> void runBenchmarks(BenchmarkRun... runs) {
-		Stopwatch<T> stopwatch = new Stopwatch<T>(LANGUAGE_JAVA, numRuns);
-		for (BenchmarkRun<T> run : runs) {
+	public void runBenchmarks(BenchmarkRun... runs) {
+		Stopwatch stopwatch = new Stopwatch(LANGUAGE_JAVA, numRuns);
+		for (BenchmarkRun run : runs) {
 			System.out.println("Running " + run.getOptions() + " (" + run.getOperation() + ")");
-			stats.add(stopwatch.timeSeries(run.getOptions(), run.getOperation(), run.getItemCount(), run.getData(), run.getFunction()));
+			stats.add(stopwatch.timeSeries(run.getOptions(), run.getOperation(), run.getItemCount(), run.getFunction()));
 			System.out.println("Finished " + run.getOptions() + " (" + run.getOperation() + ")");
 		}
 	}

@@ -1,5 +1,6 @@
 package net.batkin.s11n;
 
+import net.batkin.s11n.avro.generated.AvroOrder;
 import net.batkin.s11n.data.BenchmarkRunner;
 
 import java.io.IOException;
@@ -16,8 +17,14 @@ public class AllAvroBenchmarks {
         String filename = args[2];
 
         BenchmarkRunner runner = new BenchmarkRunner(numRuns);
-        AvroSerializer.runBenchmarks(numOrders, runner);
-        AvroDeserializer.runBenchmarks(numOrders, runner);
+
+        AvroDataGenerator<AvroOrder> dataGenerator = new SimpleOrderDataGenerator();
+        AvroSerializer<AvroOrder> serializer = new AvroSerializer<>(dataGenerator);
+        AvroDeserializer<AvroOrder> deserializer = new AvroDeserializer<>(dataGenerator);
+
+        serializer.runBenchmarks(numOrders, runner);
+        deserializer.runBenchmarks(numOrders, runner);
+
         runner.dumpCsv(filename);
     }
 }

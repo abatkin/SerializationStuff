@@ -1,18 +1,16 @@
 package net.batkin.s11n.data;
 
-public class BenchmarkRun<T> {
+public class BenchmarkRun {
 
 	private String options;
 	private String operation;
 	private int itemCount;
-	private T data;
-	private TimeableOperation<T> function;
+	private TimeableOperation function;
 
-	public BenchmarkRun(String options, String operation, int itemCount, T data, TimeableOperation<T> function) {
+	public BenchmarkRun(String options, String operation, int itemCount, TimeableOperation function) {
 		this.options = options;
 		this.operation = operation;
 		this.itemCount = itemCount;
-		this.data = data;
 		this.function = function;
 	}
 
@@ -24,7 +22,7 @@ public class BenchmarkRun<T> {
 		return operation;
 	}
 
-	public TimeableOperation<T> getFunction() {
+	public TimeableOperation getFunction() {
 		return function;
 	}
 
@@ -32,11 +30,7 @@ public class BenchmarkRun<T> {
 		return itemCount;
 	}
 
-	public T getData() {
-		return data;
-	}
-
-	public static <T> BenchmarkRun r (String options, String operation, int itemCount, T data, TimeableOperation<T> function) {
-		return new BenchmarkRun(options, operation, itemCount, data, function);
+	public static <T> BenchmarkRun r (String options, String operation, int itemCount, TimeableOperation function) {
+		return new BenchmarkRun(options, operation, itemCount, function);
 	}
 }

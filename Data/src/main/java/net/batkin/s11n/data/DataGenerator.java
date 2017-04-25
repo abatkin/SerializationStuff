@@ -12,10 +12,14 @@ public class DataGenerator {
     public static final int NUM_RUNS = 10;
     public static final String LANGUAGE_JAVA = "Java";
 
+    public static Order generateOrder(int orderNumber) {
+        return new Order("ticker" + orderNumber, randomNumber(-1_000_000_000, 1_000_000_000), randomNumber(1000, 100_000), "strategy" + orderNumber);
+    }
+
     public static List<Order> generateOrders(int numberOfOrders) {
         List<Order> orders = new ArrayList<>();
         for (int orderNumber = 0; orderNumber < numberOfOrders; orderNumber++) {
-            orders.add(new Order("ticker" + orderNumber, randomNumber(-1_000_000_000, 1_000_000_000), randomNumber(1000, 100_000), "strategy" + orderNumber));
+            orders.add(generateOrder(orderNumber));
         }
         return orders;
     }
