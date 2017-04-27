@@ -2,9 +2,9 @@ package net.batkin.s11n;
 
 import net.batkin.s11n.avro.generated.AvroOrder;
 import net.batkin.s11n.data.BenchmarkRunner;
+import net.batkin.s11n.serializer.Serializer;
+import net.batkin.s11n.serializer.SerializerWithSchema;
 import org.apache.avro.Schema;
-import org.apache.avro.file.DataFileWriter;
-import org.apache.avro.generic.GenericContainer;
 import org.apache.avro.io.BinaryEncoder;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.io.EncoderFactory;
@@ -53,16 +53,13 @@ public class AvroSerializer<T> {
     }
 
     public static <T> byte[] serializeOneByteArrayWithSchema(Schema schema, Collection<T> items) {
-        DatumWriter datumWriter = new SpecificDatumWriter(schema);
-        DataFileWriter<T> writer = new DataFileWriter<>(datumWriter);
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            writer.create(schema, bos);
+        try {
+            Serializer<T> serializer = new SerializerWithSchema<>(schema);
             for (T item : items) {
-                writer.append(item);
+                serializer.serialize(item);
             }
-            writer.close();
-            return bos.toByteArray();
-        } catch (Exception e) {
+            return serializer.getBytes();
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -93,13 +90,9 @@ public class AvroSerializer<T> {
         try {
             int len = 0;
             for (T item : items) {
-                DatumWriter datumWriter = new SpecificDatumWriter(dataGenerator.getSchema());
-                DataFileWriter<T> writer = new DataFileWriter<>(datumWriter);
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                writer.create(dataGenerator.getSchema(), bos);
-                writer.append(item);
-                writer.flush();
-                byte[] bytes = bos.toByteArray();
+                Serializer<T> serializer = new SerializerWithSchema<>(dataGenerator.getSchema());
+                serializer.serialize(item);
+                byte[] bytes = serializer.getBytes();
                 len += bytes.length;
             }
             return len;
@@ -128,18 +121,12 @@ public class AvroSerializer<T> {
 
     public static <T> List<byte[]> serializeManyByteArraysWithSchemaReuseSerializer(Schema schema, Collection<T> items) {
         try {
-            DatumWriter datumWriter = new SpecificDatumWriter(schema);
-            DataFileWriter<T> writer = new DataFileWriter<>(datumWriter);
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-
+            Serializer<T> serializer = new SerializerWithSchema<>(schema);
             List<byte[]> blobs = new ArrayList<>();
             for (T item : items) {
-                bos.reset();
-                writer.create(schema, bos);
-                writer.append(item);
-                writer.close();
-                byte[] blob = bos.toByteArray();
-                blobs.add(blob);
+                serializer.serialize(item);
+                byte[] bytes = serializer.getBytes();
+                blobs.add(bytes);
             }
             return blobs;
         } catch (IOException e) {
