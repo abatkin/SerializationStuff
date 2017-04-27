@@ -75,6 +75,6 @@ public class DescriptiveBenchmarkStatistics implements BenchmarkStatistics {
 
 	@Override
 	public Object[] toValues() {
-		return new Object[] {language, options, operation, iterations(), itemCount(), resultCount(), runtimeMin(), runtimeMax(), runtimeMean(), runtimeStdDev(), runtimeTotal()};
+		return new Object[] {language, options, operation, iterations(), itemCount(), resultCount() / iterations(), runtimeMin(), runtimeMax(), runtimeMean(), runtimeStdDev(), runtimeTotal()};
 	}
 }
