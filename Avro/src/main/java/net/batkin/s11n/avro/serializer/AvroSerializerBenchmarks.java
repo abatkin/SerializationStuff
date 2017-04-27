@@ -1,28 +1,29 @@
-package net.batkin.s11n;
+package net.batkin.s11n.avro.serializer;
 
+import net.batkin.s11n.AvroDataGenerator;
+import net.batkin.s11n.SimpleOrderDataGenerator;
 import net.batkin.s11n.avro.generated.AvroOrder;
 import net.batkin.s11n.data.BenchmarkRunner;
-import net.batkin.s11n.serializer.SerializerWithSchema;
-import net.batkin.s11n.serializer.SerializerWithoutSchema;
+import net.batkin.s11n.serializer.SerializationSet;
 
 import java.util.List;
 
 import static net.batkin.s11n.data.DataGenerator.NUM_ORDERS;
 import static net.batkin.s11n.data.DataGenerator.NUM_RUNS;
 
-public class AvroSerializer<T> {
+public class AvroSerializerBenchmarks<T> {
 
     public static final String OPERATION_SERIALIZE = "Serialize";
 
     public static void main(String[] args) throws Exception {
         BenchmarkRunner runner = new BenchmarkRunner(NUM_RUNS);
         SimpleOrderDataGenerator generator = new SimpleOrderDataGenerator();
-        AvroSerializer<AvroOrder> serializer = new AvroSerializer<>(generator);
+        AvroSerializerBenchmarks<AvroOrder> serializer = new AvroSerializerBenchmarks<>(generator);
         serializer.runBenchmarks(NUM_ORDERS, runner);
         runner.dumpCsv(System.out);
     }
 
-    public AvroSerializer(AvroDataGenerator<T> dataGenerator) {
+    public AvroSerializerBenchmarks(AvroDataGenerator<T> dataGenerator) {
         this.dataGenerator = dataGenerator;
     }
 

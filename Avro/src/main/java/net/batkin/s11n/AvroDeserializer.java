@@ -2,8 +2,9 @@ package net.batkin.s11n;
 
 import net.batkin.s11n.avro.generated.AvroOrder;
 import net.batkin.s11n.data.BenchmarkRunner;
-import net.batkin.s11n.serializer.SerializerWithSchema;
-import net.batkin.s11n.serializer.SerializerWithoutSchema;
+import net.batkin.s11n.serializer.SerializationSet;
+import net.batkin.s11n.avro.serializer.SerializerWithSchema;
+import net.batkin.s11n.avro.serializer.SerializerWithoutSchema;
 import org.apache.avro.file.DataFileReader;
 import org.apache.avro.file.SeekableByteArrayInput;
 import org.apache.avro.io.BinaryDecoder;

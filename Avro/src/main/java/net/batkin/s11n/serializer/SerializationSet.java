@@ -1,27 +1,27 @@
-package net.batkin.s11n;
+package net.batkin.s11n.serializer;
 
+import net.batkin.s11n.avro.serializer.AvroSerializerBenchmarks;
 import net.batkin.s11n.data.BenchmarkRunner;
-import net.batkin.s11n.serializer.Serializer;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Supplier;
 
-import static net.batkin.s11n.AvroSerializer.OPERATION_SERIALIZE;
 import static net.batkin.s11n.data.BenchmarkRun.r;
 
 public class SerializationSet<T> {
 
-    private SerializerProvider<T> serializerProvider;
+    private Supplier<Serializer<T>> serializerProvider;
 
-    public SerializationSet(SerializerProvider<T> serializerProvider) {
+    public SerializationSet(Supplier<Serializer<T>> serializerProvider) {
         this.serializerProvider = serializerProvider;
     }
 
     public byte[] serializeOneByteArray(Collection<T> items) {
         try {
-            Serializer<T> serializer = serializerProvider.getSerializer();
+            Serializer<T> serializer = serializerProvider.get();
             for (T item : items) {
                 serializer.serialize(item);
             }
@@ -35,7 +35,7 @@ public class SerializationSet<T> {
         try {
             List<byte[]> blobs = new ArrayList<>();
             for (T item : items) {
-                Serializer<T> serializer = serializerProvider.getSerializer();
+                Serializer<T> serializer = serializerProvider.get();
                 serializer.serialize(item);
                 byte[] bytes = serializer.getBytes();
                 blobs.add(bytes);
@@ -48,7 +48,7 @@ public class SerializationSet<T> {
 
     public List<byte[]> serializeManyByteArraysWithReuse(Collection<T> items) {
         try {
-            Serializer<T> serializer = serializerProvider.getSerializer();
+            Serializer<T> serializer = serializerProvider.get();
             List<byte[]> blobs = new ArrayList<>();
             for (T item : items) {
                 serializer.serialize(item);
@@ -61,13 +61,13 @@ public class SerializationSet<T> {
         }
     }
 
-    public static <T> void runBenchmarks(BenchmarkRunner runner, Collection<T> items, SerializerProvider<T> serializerProvider) {
+    public static <T> void runBenchmarks(BenchmarkRunner runner, Collection<T> items, Supplier<Serializer<T>> serializerProvider) {
         SerializationSet<T> serializationSet = new SerializationSet<>(serializerProvider);
-        String serializerType = serializerProvider.getSerializer().getClass().getSimpleName();
+        String serializerType = serializerProvider.get().getClass().getSimpleName();
         runner.runBenchmarks(
-                r(serializerType + ", One Byte Array", OPERATION_SERIALIZE, items.size(), () -> serializationSet.serializeOneByteArray(items).length),
-                r(serializerType + ", Many Byte Arrays, New Serializer", OPERATION_SERIALIZE, items.size(), () -> addBytes(serializationSet.serializeManyByteArraysNoReuse(items))),
-                r(serializerType + ", Many Byte Arrays, Reuse Serializer", OPERATION_SERIALIZE, items.size(), () -> addBytes(serializationSet.serializeManyByteArraysWithReuse(items)))
+                r(serializerType + ", One Byte Array", AvroSerializerBenchmarks.OPERATION_SERIALIZE, items.size(), () -> serializationSet.serializeOneByteArray(items).length),
+                r(serializerType + ", Many Byte Arrays, New Serializer", AvroSerializerBenchmarks.OPERATION_SERIALIZE, items.size(), () -> addBytes(serializationSet.serializeManyByteArraysNoReuse(items))),
+                r(serializerType + ", Many Byte Arrays, Reuse Serializer", AvroSerializerBenchmarks.OPERATION_SERIALIZE, items.size(), () -> addBytes(serializationSet.serializeManyByteArraysWithReuse(items)))
         );
     }
 

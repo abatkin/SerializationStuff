@@ -1,5 +1,6 @@
-package net.batkin.s11n.serializer;
+package net.batkin.s11n.avro.serializer;
 
+import net.batkin.s11n.serializer.Serializer;
 import org.apache.avro.Schema;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.io.DatumWriter;
