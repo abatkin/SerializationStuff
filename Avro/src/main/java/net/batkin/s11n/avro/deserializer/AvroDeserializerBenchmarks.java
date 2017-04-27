@@ -1,7 +1,7 @@
-package net.batkin.s11n;
+package net.batkin.s11n.avro.deserializer;
 
-import net.batkin.s11n.avro.deserializer.DeserializerWithSchema;
-import net.batkin.s11n.avro.deserializer.DeserializerWithoutSchema;
+import net.batkin.s11n.AvroDataGenerator;
+import net.batkin.s11n.SimpleOrderDataGenerator;
 import net.batkin.s11n.avro.generated.AvroOrder;
 import net.batkin.s11n.avro.serializer.SerializerWithSchema;
 import net.batkin.s11n.avro.serializer.SerializerWithoutSchema;
@@ -14,19 +14,19 @@ import java.util.List;
 import static net.batkin.s11n.data.DataGenerator.NUM_ORDERS;
 import static net.batkin.s11n.data.DataGenerator.NUM_RUNS;
 
-public class AvroDeserializer<T> {
+public class AvroDeserializerBenchmarks<T> {
 
     public static final String OPERATION_DESERIALIZE = "Deserialize";
 
     public static void main(String[] args) throws Exception {
-        AvroDeserializer<AvroOrder> deserializer = new AvroDeserializer<>(new SimpleOrderDataGenerator());
+        AvroDeserializerBenchmarks<AvroOrder> deserializer = new AvroDeserializerBenchmarks<>(new SimpleOrderDataGenerator());
 
         BenchmarkRunner runner = new BenchmarkRunner(NUM_RUNS);
         deserializer.runBenchmarks(NUM_ORDERS, runner);
         runner.dumpCsv(System.out);
     }
 
-    public AvroDeserializer(AvroDataGenerator<T> dataGenerator) {
+    public AvroDeserializerBenchmarks(AvroDataGenerator<T> dataGenerator) {
         this.dataGenerator = dataGenerator;
     }
 

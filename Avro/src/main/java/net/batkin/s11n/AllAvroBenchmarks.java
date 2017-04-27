@@ -1,5 +1,6 @@
 package net.batkin.s11n;
 
+import net.batkin.s11n.avro.deserializer.AvroDeserializerBenchmarks;
 import net.batkin.s11n.avro.generated.AvroOrder;
 import net.batkin.s11n.data.BenchmarkRunner;
 import net.batkin.s11n.avro.serializer.AvroSerializerBenchmarks;
@@ -21,7 +22,7 @@ public class AllAvroBenchmarks {
 
         AvroDataGenerator<AvroOrder> dataGenerator = new SimpleOrderDataGenerator();
         AvroSerializerBenchmarks<AvroOrder> serializer = new AvroSerializerBenchmarks<>(dataGenerator);
-        AvroDeserializer<AvroOrder> deserializer = new AvroDeserializer<>(dataGenerator);
+        AvroDeserializerBenchmarks<AvroOrder> deserializer = new AvroDeserializerBenchmarks<>(dataGenerator);
 
         serializer.runBenchmarks(numOrders, runner);
         deserializer.runBenchmarks(numOrders, runner);

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static net.batkin.s11n.AvroDeserializer.OPERATION_DESERIALIZE;
+import static net.batkin.s11n.avro.deserializer.AvroDeserializerBenchmarks.OPERATION_DESERIALIZE;
 import static net.batkin.s11n.data.BenchmarkRun.r;
 import static net.batkin.s11n.data.Util.sumArrayLengths;
 
