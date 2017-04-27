@@ -2,28 +2,17 @@ package net.batkin.s11n;
 
 import net.batkin.s11n.avro.generated.AvroOrder;
 import net.batkin.s11n.data.BenchmarkRunner;
-import net.batkin.s11n.serializer.Serializer;
 import net.batkin.s11n.serializer.SerializerWithSchema;
-import org.apache.avro.Schema;
-import org.apache.avro.io.BinaryEncoder;
-import org.apache.avro.io.DatumWriter;
-import org.apache.avro.io.EncoderFactory;
-import org.apache.avro.specific.SpecificDatumWriter;
+import net.batkin.s11n.serializer.SerializerWithoutSchema;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
-import static net.batkin.s11n.data.BenchmarkRun.r;
 import static net.batkin.s11n.data.DataGenerator.NUM_ORDERS;
 import static net.batkin.s11n.data.DataGenerator.NUM_RUNS;
-import static net.batkin.s11n.data.Util.sumArrayLengths;
 
 public class AvroSerializer<T> {
 
-    private static final String OPERATION_SERIALIZE = "Serialize";
+    public static final String OPERATION_SERIALIZE = "Serialize";
 
     public static void main(String[] args) throws Exception {
         BenchmarkRunner runner = new BenchmarkRunner(NUM_RUNS);
@@ -42,125 +31,9 @@ public class AvroSerializer<T> {
     public void runBenchmarks(int numItems, BenchmarkRunner runner) {
         List<T> items = dataGenerator.generateDataSeries(numItems);
         System.out.println("Generated items for Serializer");
-        runner.runBenchmarks(
-                r("With Schema, One Byte Array", OPERATION_SERIALIZE, items.size(), () -> benchmarkSerializeOneByteArrayWithSchema(items)),
-                r("Without Schema, One Byte Array", OPERATION_SERIALIZE, items.size(), () -> benchmarkSerializeOneByteArrayWithoutSchema(items)),
-                r("With Schema, Many Byte Arrays, New Serializer", OPERATION_SERIALIZE, items.size(), () -> serializeManyByteArraysWithSchemaNewSerializer(items)),
-                r("Without Schema, Many Byte Arrays, New Serializer", OPERATION_SERIALIZE, items.size(), () -> serializeManyByteArraysWithoutSchemaNewSerializer(items)),
-                r("With Schema, Many Byte Arrays, Reuse Serializer", OPERATION_SERIALIZE, items.size(), () -> benchmarkSerializeManyByteArraysWithSchemaReuseSerializer(items)),
-                r("Without Schema, Many Byte Arrays, Reuse Serializer", OPERATION_SERIALIZE, items.size(), () -> benchmarkSerializeManyByteArraysWithoutSchemaReuseSerializer(items))
-        );
-    }
 
-    public static <T> byte[] serializeOneByteArrayWithSchema(Schema schema, Collection<T> items) {
-        try {
-            Serializer<T> serializer = new SerializerWithSchema<>(schema);
-            for (T item : items) {
-                serializer.serialize(item);
-            }
-            return serializer.getBytes();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private int benchmarkSerializeOneByteArrayWithSchema(Collection<T> items) {
-        return serializeOneByteArrayWithSchema(dataGenerator.getSchema(), items).length;
-    }
-
-    public static <T> byte[] serializeOneByteArrayWithoutSchema(Schema schema, Collection<T> items) {
-        DatumWriter datumWriter = new SpecificDatumWriter(schema);
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            BinaryEncoder encoder = EncoderFactory.get().binaryEncoder(baos, null);
-            for (T item : items) {
-                datumWriter.write(item, encoder);
-            }
-            encoder.flush();
-            return baos.toByteArray();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private int benchmarkSerializeOneByteArrayWithoutSchema(Collection<T> items) {
-        return serializeOneByteArrayWithoutSchema(dataGenerator.getSchema(), items).length;
-    }
-
-    private int serializeManyByteArraysWithSchemaNewSerializer(Collection<T> items) {
-        try {
-            int len = 0;
-            for (T item : items) {
-                Serializer<T> serializer = new SerializerWithSchema<>(dataGenerator.getSchema());
-                serializer.serialize(item);
-                byte[] bytes = serializer.getBytes();
-                len += bytes.length;
-            }
-            return len;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private int serializeManyByteArraysWithoutSchemaNewSerializer(Collection<T> items) {
-        try {
-            int len = 0;
-            for (T item : items) {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                DatumWriter datumWriter = new SpecificDatumWriter(dataGenerator.getSchema());
-                BinaryEncoder encoder = EncoderFactory.get().binaryEncoder(baos, null);
-                datumWriter.write(item, encoder);
-                encoder.flush();
-                byte[] bytes = baos.toByteArray();
-                len += bytes.length;
-            }
-            return len;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static <T> List<byte[]> serializeManyByteArraysWithSchemaReuseSerializer(Schema schema, Collection<T> items) {
-        try {
-            Serializer<T> serializer = new SerializerWithSchema<>(schema);
-            List<byte[]> blobs = new ArrayList<>();
-            for (T item : items) {
-                serializer.serialize(item);
-                byte[] bytes = serializer.getBytes();
-                blobs.add(bytes);
-            }
-            return blobs;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public int benchmarkSerializeManyByteArraysWithSchemaReuseSerializer(Collection<T> items) {
-        return sumArrayLengths(serializeManyByteArraysWithSchemaReuseSerializer(dataGenerator.getSchema(), items));
-    }
-
-    public static <T> List<byte[]> serializeManyByteArraysWithoutSchemaReuseSerializer(Schema schema, Collection<T> items) {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            DatumWriter datumWriter = new SpecificDatumWriter(schema);
-            BinaryEncoder encoder = null;
-
-            List<byte[]> blobs = new ArrayList<>();
-            for (T item : items) {
-                baos.reset();
-                encoder = EncoderFactory.get().binaryEncoder(baos, encoder);
-                datumWriter.write(item, encoder);
-                encoder.flush();
-                byte[] blob = baos.toByteArray();
-                blobs.add(blob);
-            }
-            return blobs;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private int benchmarkSerializeManyByteArraysWithoutSchemaReuseSerializer(Collection<T> items) {
-        return sumArrayLengths(serializeManyByteArraysWithoutSchemaReuseSerializer(dataGenerator.getSchema(), items));
+        SerializationSet.runBenchmarks(runner, items, () -> new SerializerWithSchema<>(dataGenerator.getSchema()));
+        SerializationSet.runBenchmarks(runner, items, () -> new SerializerWithoutSchema<>(dataGenerator.getSchema()));
     }
 
 }
