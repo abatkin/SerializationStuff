@@ -7,4 +7,8 @@ public interface Serializer<T> {
     void serialize(T item) throws IOException;
     byte[] getBytes() throws IOException;
 
+    default String getName() {
+        return getClass().getSimpleName();
+    }
+
 }

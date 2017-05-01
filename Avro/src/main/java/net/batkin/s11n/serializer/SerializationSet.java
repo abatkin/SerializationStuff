@@ -63,7 +63,7 @@ public class SerializationSet<T> {
 
     public static <T> void runBenchmarks(BenchmarkRunner runner, Collection<T> items, Supplier<Serializer<T>> serializerProvider) {
         SerializationSet<T> serializationSet = new SerializationSet<>(serializerProvider);
-        String serializerType = serializerProvider.get().getClass().getSimpleName();
+        String serializerType = serializerProvider.get().getName();
         runner.runBenchmarks(
                 r(serializerType + ", One Byte Array", AvroSerializerBenchmarks.OPERATION_SERIALIZE, items.size(), () -> serializationSet.serializeOneByteArray(items).length),
                 r(serializerType + ", Many Byte Arrays, New Serializer", AvroSerializerBenchmarks.OPERATION_SERIALIZE, items.size(), () -> addBytes(serializationSet.serializeManyByteArraysNoReuse(items))),

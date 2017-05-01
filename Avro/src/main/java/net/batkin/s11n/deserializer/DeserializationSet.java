@@ -58,7 +58,7 @@ public class DeserializationSet<T> {
         int manyBlobsLen = sumArrayLengths(manyBlobs);
 
         DeserializationSet<T> deserializationSet = new DeserializationSet<>(deserializerProvider);
-        String deserializerType = deserializerProvider.get().getClass().getSimpleName();
+        String deserializerType = deserializerProvider.get().getName();
         runner.runBenchmarks(
                 r(deserializerType + ", One Byte Array", OPERATION_DESERIALIZE, oneBlob.length, () -> deserializationSet.deserializeOneByteArray(oneBlob).size()),
                 r(deserializerType + ", Many Byte Arrays, New Deserializer", OPERATION_DESERIALIZE, manyBlobsLen, () -> deserializationSet.deserializeManyByteArraysNoReuse(manyBlobs).size()),

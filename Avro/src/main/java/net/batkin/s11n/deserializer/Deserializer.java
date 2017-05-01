@@ -7,4 +7,8 @@ public interface Deserializer<T> {
 
     List<T> deserialize(byte[] bytes) throws IOException;
 
+    default String getName() {
+        return getClass().getSimpleName();
+    }
+
 }
